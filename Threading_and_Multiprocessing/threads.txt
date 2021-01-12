@@ -1,0 +1,15 @@
+Threads
+A thread is an entity within a process that can be scheduled for execution (Also known as "leightweight process"). A Process can spawn multiple threads. The main difference is that all threads within a process share the same memory.
+
+Key facts:
+
++ Multiple threads can be spawned within one process
++ Memory is shared between all threads
++ Starting a thread is faster than starting a process
++ Great for I/O-bound tasks
++ Leightweight - low memory footprint
+
+- One GIL for all threads, i.e. threads are limited by GIL
+- Multithreading has no effect for CPU-bound tasks due to the GIL
+- Not interruptible/killable -> be careful with memory leaks
+- increased potential for race conditions

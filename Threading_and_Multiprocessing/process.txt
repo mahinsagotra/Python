@@ -1,0 +1,18 @@
+Process
+A Process is an instance of a program, e.g. a Python interpreter. They are independent from each other and do not share the same memory.
+
+Key facts:
+
++ A new process is started independently from the first process
++ Takes advantage of multiple CPUs and cores
++ Separate memory space
++ Memory is not shared between processes
++ One GIL (Global interpreter lock) for each process, i.e. avoids GIL limitation
++ Great for CPU-bound processing
++ Child processes are interruptable/killable
++ Larger memory footprint
+
+- Starting a process is slower that starting a thread
+- Heavyweight
+- More memory
+- IPC (inter-process communication) is more complicated
