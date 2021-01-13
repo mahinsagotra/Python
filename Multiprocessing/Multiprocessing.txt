@@ -1,0 +1,130 @@
+# Multiprocessing in Python
+In this article we talk about how to use the multiprocessing module in Python.
+
+How to create and start multiple processes
+How to wait for processes to complete
+How to share data between processes
+How to use Locks to prevent race conditions
+How to use a Queue for process-safe data/task processing.
+How to use a Pool to manage multiple worker processes
+
+# Create and run processes
+You create a process with multiprocessing.Process(). It takes two 
+important arguments:
+
+* target: a callable object (function) for this process to be invoked 
+    when the process starts
+* args: the (function) arguments for the target function. This must be a 
+    tuple
+Start a process with process.start()
+
+Call process.join() to tell the program that it should wait for this 
+process to complete before it continues with the rest of the code.
+
+# Share data between processes
+
+Since processes don't live in the same memory space, they do not have access to the same (public) data. Thus, they need special shared memory objects to share data.
+
+Data can be stored in a shared memory variable using Value or Array.
+
+* Value(type, value): Create a ctypes object of type type. Access the 
+    value with .target.
+* Array(type, value): Create a ctypes array with elements of type type. 
+    Access the values with [].
+
+Task: Create two processes, each process should have access to a shared 
+      variable and modify it (in this case only increase it repeatedly 
+      by 1 for 100 times). Create another two processes that share an 
+      array and modify (increase) all the elements in the array.
+
+# How to use Locks
+Notice that in the above example, the 2 processes should increment the 
+shared value by 1 for 100 times. This results in 200 total operations. 
+But why is the end value not 200?
+
+# Race condition
+A race condition happened here. A race condition occurs when two or more 
+processes or threads can access shared data and they try to change it at 
+the same time. In our example the two processes have to read the shared 
+value, increase it by 1, and write it back into the shared variable. If 
+this happens at the same time, the two processes read the same value, 
+increase it and write it back. Thus, both processes write the same 
+increased value back into the shared object, and the value was not 
+increased by 2. See https://www.python-engineer.com/learn/advancedpython16_threading/ 
+for a detailed explanation of race conditions.
+
+# Avoid race conditions with Locks
+A lock (also known as mutex) is a synchronization mechanism for enforcing 
+limits on access to a resource in an environment where there are many 
+processes/threads of execution. A Lock has two states: locked and unlocked. 
+If the state is locked, it does not allow other concurrent 
+processes/threads to enter this code section until the state is 
+unlocked again.
+
+Two functions are important:
+
+lock.acquire() : This will lock the state and block
+lock.release() : This will unlock the state again.
+Important: You should always release the block again after it was acquired!
+
+
+# Use the lock as a context manager
+After lock.acquire() you should never forget to call lock.release() to 
+unblock the code. You can also use a lock as a context manager, wich will 
+safely lock and unlock your code. It is recommended to use a lock this way:
+
+
+# Using Queues in Python
+
+Data can also be shared between processes with a Queue. Queues can be 
+used for thread-safe/process-safe data exchanges and data processing 
+both in a multithreaded and a multiprocessing environment, which means 
+you can avoid having to use any synchronization primitives like locks.
+
+The queue
+A queue is a linear data structure that follows the First In First Out 
+(FIFO) principle. A good example is a queue of customers that are 
+waiting in line, where the customer that came first is served first.
+
+
+# Using a queue in multiprocessing
+
+Operations with a queue are process-safe. The multiprocessing Queue 
+implements all the methods of queue.Queue except for task_done() and 
+join(). Important methods are:
+
+1> q.get() : Remove and return the first item. By default, it blocks 
+    until the item is available.
+2> q.put(item) : Puts element at the end of the queue. By default, it 
+blocks until a free slot is available.
+3> q.empty() : Return True if the queue is empty.
+4> q.close() : Indicate that no more data will be put on this queue by 
+    the current process.
+
+# Process Pools
+
+A process pool object controls a pool of worker processes to which jobs 
+can be submitted It supports asynchronous results with timeouts and 
+callbacks and has a parallel map implementation. It can automatically 
+manage the available processors and split data into smaller chunks which 
+can then be processed in parallel by different processes. 
+See https://docs.python.org/3.7/library/multiprocessing.html#multiprocessing.pool for all possible methods. Important methods are:
+
+1> map(func, iterable[, chunksize]) : This method chops the iterable into 
+    a number of chunks which it submits to the process pool as separate 
+    tasks. The (approximate) size of these chunks can be specified by 
+    setting chunksize to a positive integer. It blocks until the result 
+    is ready.
+
+2> close() : Prevents any more tasks from being submitted to the pool. 
+    Once all the tasks have been completed the worker processes will exit.
+
+3> join(): Wait for the worker processes to exit. One must call close() 
+or terminate() before using join().
+
+4> apply(func, args): Call func with arguments args. It blocks until the 
+result is ready. func is only executed in ONE of the workers of the pool.
+
+Note: There are also asynchronous variants map_async() and apply_async() 
+that will not block. They can execute callbacks when the results are ready.
+
